@@ -5,7 +5,7 @@
  *
  *   npm run demo
  */
-import { buildApp } from '../src/app.js';
+import { buildApp } from '../src/http.js';
 import { MemoryRepo } from '../src/repo/memory.js';
 import { FakeBilling } from '../tests/helpers.js';
 

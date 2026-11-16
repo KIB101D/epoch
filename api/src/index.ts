@@ -1,6 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import type { FastifyInstance } from 'fastify';
 import Stripe from 'stripe';
-import { buildApp } from './app.js';
+import { buildApp } from './http.js';
 import { loadConfig } from './config.js';
 import { DynamoRepo, createDocClient } from './repo/dynamo.js';
 import { ensureTable } from './repo/table.js';
@@ -24,7 +25,7 @@ const repo = new DynamoRepo(
 );
 const billing = new StripeGateway(new Stripe(config.STRIPE_SECRET_KEY), config.STRIPE_WEBHOOK_SECRET);
 
-const app = buildApp({
+const app: FastifyInstance = buildApp({
   repo,
   billing,
   cookieSecret: config.COOKIE_SECRET,

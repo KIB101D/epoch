@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { buildApp } from '../src/app.js';
+import { buildApp } from '../src/http.js';
 import type { Plan } from '../src/domain/subscription.js';
 import { PRICE_LOOKUP_KEYS } from '../src/domain/subscription.js';
 import { MemoryRepo } from '../src/repo/memory.js';

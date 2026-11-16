@@ -23,7 +23,7 @@ Landing → Quiz (era · goal · minutes) → Personal plan + paywall → Stripe
 ```
 web/  Next.js App Router + Tailwind      /api/* is proxied to the API (same-origin cookies)
 api/  Fastify + TypeScript
-  src/app.ts               routes, signed anonymous session cookie, error handling
+  src/http.ts              routes, signed anonymous session cookie, error handling
   src/stripe/gateway.ts    BillingGateway interface + Stripe implementation
   src/stripe/webhook.ts    event → state (idempotent, order-safe, retry-safe)
   src/repo/types.ts        storage port
@@ -112,12 +112,12 @@ CI (GitHub Actions) runs typecheck, tests against DynamoDB Local, and builds bot
 
 ## Deployment
 
-The live demo runs on free tiers:
+The live demo runs on free tiers, as two Vercel projects from this repo plus DynamoDB:
 
 | Part     | Where                                   | Notes |
 |----------|-----------------------------------------|-------|
 | Web      | Vercel, root directory `web`            | `API_URL` points at the API; `/api/*` is proxied, so cookies stay first-party |
-| API      | Render web service from `api/Dockerfile`| Frankfurt region, health check `/health` |
+| API      | Vercel, root directory `api`            | Fastify runs as a Vercel Function (zero config, entry `src/index.ts`) |
 | Database | DynamoDB on-demand, `eu-central-1`      | the API creates the table and TTL on first start |
 | Payments | Stripe test mode                        | webhook endpoint `https://<api>/webhooks/stripe` |
 
@@ -125,7 +125,7 @@ The API's AWS credentials belong to an IAM user limited to this one table and it
 
 API environment in production: `COOKIE_SECRET`, `WEB_URL` (the Vercel URL, used for Stripe redirects and the `Secure` cookie flag), `DYNAMO_TABLE`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. `DYNAMO_ENDPOINT` is left unset, so the SDK talks to real DynamoDB.
 
-The same image runs on ECS Fargate behind an ALB with secrets from Secrets Manager and a task role instead of access keys.
+The API also ships as a Docker image (`api/Dockerfile`), so the same code runs on Render, Fly or ECS Fargate behind an ALB, with secrets from Secrets Manager and a task role instead of access keys.
 
 ## What I would do next
 

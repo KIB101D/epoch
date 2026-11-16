@@ -36,7 +36,7 @@ beforeAll(async () => {
 afterAll(() => close());
 
 describe('DynamoRepo (single-table)', () => {
-  it('stores users and finds them by Stripe customer via GSI1', async () => {
+  it('stores users and resolves them from a Stripe customer via the lookup item', async () => {
     await repo.createUser('u-gsi');
     await repo.saveAnswers('u-gsi', { era: 'rome', goal: 'study', minutesPerDay: 5 });
     await repo.linkCustomer('u-gsi', 'cus_gsi');

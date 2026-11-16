@@ -1,4 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { awsCredentialsProvider } from '@vercel/oidc-aws-credentials-provider';
 import type { FastifyInstance } from 'fastify';
 import Stripe from 'stripe';
 import { buildApp } from './http.js';
@@ -9,18 +10,23 @@ import { StripeGateway } from './stripe/gateway.js';
 
 const config = loadConfig();
 
-// Create the table on first start: in DynamoDB Local for development, in AWS for a fresh deployment.
-// Safe to run on every start (it only describes the table when it already exists).
-const raw = new DynamoDBClient({
-  region: config.AWS_REGION,
-  ...(config.DYNAMO_ENDPOINT
-    ? { endpoint: config.DYNAMO_ENDPOINT, credentials: { accessKeyId: 'local', secretAccessKey: 'local' } }
-    : {}),
-});
-if (await ensureTable(raw, config.DYNAMO_TABLE)) console.log(`Created table "${config.DYNAMO_TABLE}"`);
+// On Vercel the AWS integration provides a role to assume via OIDC; otherwise the default AWS credential chain is used.
+const credentials = config.AWS_ROLE_ARN
+  ? awsCredentialsProvider({ roleArn: config.AWS_ROLE_ARN, clientConfig: { region: config.AWS_REGION } })
+  : undefined;
+
+if (config.DYNAMO_ENDPOINT || config.DYNAMO_CREATE_TABLE === 'true') {
+  const raw = new DynamoDBClient({
+    region: config.AWS_REGION,
+    ...(config.DYNAMO_ENDPOINT
+      ? { endpoint: config.DYNAMO_ENDPOINT, credentials: { accessKeyId: 'local', secretAccessKey: 'local' } }
+      : { credentials }),
+  });
+  if (await ensureTable(raw, config.DYNAMO_TABLE)) console.log(`Created table "${config.DYNAMO_TABLE}"`);
+}
 
 const repo = new DynamoRepo(
-  createDocClient({ region: config.AWS_REGION, endpoint: config.DYNAMO_ENDPOINT }),
+  createDocClient({ region: config.AWS_REGION, endpoint: config.DYNAMO_ENDPOINT, credentials }),
   config.DYNAMO_TABLE,
 );
 const billing = new StripeGateway(new Stripe(config.STRIPE_SECRET_KEY), config.STRIPE_WEBHOOK_SECRET);

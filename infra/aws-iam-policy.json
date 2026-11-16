@@ -9,14 +9,12 @@
         "dynamodb:PutItem",
         "dynamodb:UpdateItem",
         "dynamodb:DeleteItem",
-        "dynamodb:Query",
         "dynamodb:DescribeTable",
         "dynamodb:CreateTable",
         "dynamodb:UpdateTimeToLive"
       ],
       "Resource": [
-        "arn:aws:dynamodb:eu-central-1:*:table/epoch",
-        "arn:aws:dynamodb:eu-central-1:*:table/epoch/index/*"
+        "arn:aws:dynamodb:eu-central-1:*:table/epoch"
       ]
     }
   ]

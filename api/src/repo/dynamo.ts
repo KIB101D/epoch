@@ -1,10 +1,10 @@
 import { ConditionalCheckFailedException, DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import type { AwsCredentialIdentityProvider } from '@smithy/types';
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  QueryCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { Subscription } from '../domain/subscription.js';
@@ -13,23 +13,27 @@ import type { FunnelAnswers, Repo, User } from './types.js';
 /**
  * Single-table design
  *
- * | PK              | SK            | What                                   | GSI1PK              |
- * |-----------------|---------------|----------------------------------------|---------------------|
- * | USER#<userId>   | PROFILE       | answers, email, customer, progress     | CUSTOMER#<cus_...>  |
- * | USER#<userId>   | SUBSCRIPTION  | status, plan, period end, event order  |                     |
- * | EVENT#<evt_...> | EVENT         | processed Stripe events (TTL 30 days)  |                     |
+ * | PK                 | SK            | What                                   |
+ * |--------------------|---------------|----------------------------------------|
+ * | USER#<userId>      | PROFILE       | answers, email, customer, progress     |
+ * | USER#<userId>      | SUBSCRIPTION  | status, plan, period end, event order  |
+ * | CUSTOMER#<cus_...> | CUSTOMER      | userId: resolves webhooks to our user  |
+ * | EVENT#<evt_...>    | EVENT         | processed Stripe events (TTL 30 days)  |
  *
- * GSI1 (GSI1PK, GSI1SK) resolves a Stripe customer id to our user in webhooks.
+ * The CUSTOMER item is a lookup item instead of a GSI: one GetItem, strongly consistent,
+ * and the table needs nothing but PK and SK.
  */
 const userPk = (userId: string) => `USER#${userId}`;
 const EVENT_TTL_SECONDS = 30 * 24 * 60 * 60;
 
-export function createDocClient(opts: { region: string; endpoint?: string }) {
+export function createDocClient(opts: { region: string; endpoint?: string; credentials?: AwsCredentialIdentityProvider }) {
   const client = new DynamoDBClient({
     region: opts.region,
     ...(opts.endpoint
       ? { endpoint: opts.endpoint, credentials: { accessKeyId: 'local', secretAccessKey: 'local' } }
-      : {}),
+      : opts.credentials
+        ? { credentials: opts.credentials }
+        : {}),
   });
   return DynamoDBDocumentClient.from(client, { marshallOptions: { removeUndefinedValues: true } });
 }
@@ -96,12 +100,17 @@ export class DynamoRepo implements Repo {
     return this.setProfileFields(userId, { answers });
   }
 
-  linkCustomer(userId: string, customerId: string) {
-    return this.setProfileFields(userId, {
-      stripeCustomerId: customerId,
-      GSI1PK: `CUSTOMER#${customerId}`,
-      GSI1SK: userPk(userId),
-    });
+  async linkCustomer(userId: string, customerId: string) {
+    // The lookup item goes first: once it exists, any webhook for this customer can be resolved.
+    await this.db.send(
+      new PutCommand({
+        TableName: this.table,
+        Item: { PK: `CUSTOMER#${customerId}`, SK: 'CUSTOMER', userId },
+        ConditionExpression: 'attribute_not_exists(PK) OR userId = :u',
+        ExpressionAttributeValues: { ':u': userId },
+      }),
+    );
+    await this.setProfileFields(userId, { stripeCustomerId: customerId });
   }
 
   setEmail(userId: string, email: string) {
@@ -110,17 +119,13 @@ export class DynamoRepo implements Repo {
 
   async findUserIdByCustomer(customerId: string) {
     const res = await this.db.send(
-      new QueryCommand({
+      new GetCommand({
         TableName: this.table,
-        IndexName: 'GSI1',
-        KeyConditionExpression: 'GSI1PK = :pk',
-        ExpressionAttributeValues: { ':pk': `CUSTOMER#${customerId}` },
-        Limit: 1,
+        Key: { PK: `CUSTOMER#${customerId}`, SK: 'CUSTOMER' },
+        ConsistentRead: true,
       }),
     );
-    // GSI1 projects keys only, so the user id is read from GSI1SK ("USER#<id>").
-    const sk = res.Items?.[0]?.GSI1SK as string | undefined;
-    return sk ? sk.slice('USER#'.length) : null;
+    return (res.Item?.userId as string | undefined) ?? null;
   }
 
   async completeLesson(userId: string, lessonId: string) {

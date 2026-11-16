@@ -6,7 +6,7 @@ import {
   type DynamoDBClient,
 } from '@aws-sdk/client-dynamodb';
 
-/** Creates the single table with GSI1 if it does not exist yet. Safe to run repeatedly. */
+/** Creates the single table (PK + SK, on-demand, TTL on expiresAt) if it does not exist yet. Safe to run repeatedly. */
 export async function ensureTable(client: DynamoDBClient, table: string) {
   try {
     await client.send(new DescribeTableCommand({ TableName: table }));
@@ -24,22 +24,10 @@ export async function ensureTable(client: DynamoDBClient, table: string) {
       AttributeDefinitions: [
         { AttributeName: 'PK', AttributeType: 'S' },
         { AttributeName: 'SK', AttributeType: 'S' },
-        { AttributeName: 'GSI1PK', AttributeType: 'S' },
-        { AttributeName: 'GSI1SK', AttributeType: 'S' },
       ],
       KeySchema: [
         { AttributeName: 'PK', KeyType: 'HASH' },
         { AttributeName: 'SK', KeyType: 'RANGE' },
-      ],
-      GlobalSecondaryIndexes: [
-        {
-          IndexName: 'GSI1',
-          KeySchema: [
-            { AttributeName: 'GSI1PK', KeyType: 'HASH' },
-            { AttributeName: 'GSI1SK', KeyType: 'RANGE' },
-          ],
-          Projection: { ProjectionType: 'KEYS_ONLY' },
-        },
       ],
     }),
   );

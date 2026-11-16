@@ -29,6 +29,10 @@ const repo = new DynamoRepo(
   createDocClient({ region: config.AWS_REGION, endpoint: config.DYNAMO_ENDPOINT, credentials }),
   config.DYNAMO_TABLE,
 );
+console.log(
+  `DynamoDB table "${config.DYNAMO_TABLE}" in ${config.AWS_REGION}` +
+    (config.DYNAMO_ENDPOINT ? ` at ${config.DYNAMO_ENDPOINT}` : credentials ? ' via Vercel OIDC' : ''),
+);
 const billing = new StripeGateway(new Stripe(config.STRIPE_SECRET_KEY), config.STRIPE_WEBHOOK_SECRET);
 
 const app: FastifyInstance = buildApp({

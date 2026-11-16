@@ -124,7 +124,7 @@ The live demo is two Vercel projects from this repo plus DynamoDB:
 
 **No AWS keys in the deployment.** The integration sets `AWS_ROLE_ARN` and `AWS_REGION`; the API exchanges Vercel's OIDC token for short-lived credentials (`@vercel/oidc-aws-credentials-provider`). Without `AWS_ROLE_ARN` the default AWS credential chain is used, so access keys or an IAM role work as well. For a self-managed AWS account, [`infra/aws-iam-policy.json`](infra/aws-iam-policy.json) limits the API to one table, and `DYNAMO_CREATE_TABLE=true` lets it create the table on first start.
 
-API environment: `COOKIE_SECRET`, `WEB_URL` (the web URL, used for Stripe redirects and the `Secure` cookie flag), `DYNAMO_TABLE`, `AWS_REGION`, `AWS_ROLE_ARN` (from the integration), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. `DYNAMO_ENDPOINT` stays unset in production.
+API environment: `COOKIE_SECRET`, `WEB_URL` (the web URL, used for Stripe redirects and the `Secure` cookie flag), `AWS_REGION`, `AWS_ROLE_ARN` and `DYNAMODB_TABLE_NAME` (all from the integration; `DYNAMODB_TABLE_NAME` wins over `DYNAMO_TABLE`), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. `DYNAMO_ENDPOINT` stays unset in production.
 
 The API also ships as a Docker image (`api/Dockerfile`), so the same code runs on Render, Fly or ECS Fargate with a task role.
 

@@ -18,7 +18,8 @@ const schema = z.object({
 export type Config = z.infer<typeof schema>;
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
-  const parsed = schema.safeParse(env);
+  // The Vercel AWS integration names the table it created (and grants access to) in DYNAMODB_TABLE_NAME.
+  const parsed = schema.safeParse({ ...env, DYNAMO_TABLE: env.DYNAMODB_TABLE_NAME || env.DYNAMO_TABLE });
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `  ${i.path.join('.')}: ${i.message}`).join('\n');
     throw new Error(`Invalid environment:\n${issues}`);

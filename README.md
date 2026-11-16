@@ -110,12 +110,22 @@ cd api && npm test
 
 CI (GitHub Actions) runs typecheck, tests against DynamoDB Local, and builds both apps.
 
-## Deploying to AWS
+## Deployment
 
-- **API**: the `api/Dockerfile` image on ECS Fargate behind an ALB. `COOKIE_SECRET` and the Stripe keys come from Secrets Manager, the task role gets `dynamodb:*Item` and `Query` on the table and its index.
-- **DynamoDB**: on-demand table created by `npm run db:create` (or IaC) with TTL on `expiresAt`.
-- **Web**: Next.js on ECS Fargate or any Node host, with CloudFront in front. `API_URL` points at the internal API.
-- **Stripe**: register `https://<api>/webhooks/stripe` for `checkout.session.completed`, `customer.subscription.*` and `invoice.payment_failed`.
+The live demo runs on free tiers:
+
+| Part     | Where                                   | Notes |
+|----------|-----------------------------------------|-------|
+| Web      | Vercel, root directory `web`            | `API_URL` points at the API; `/api/*` is proxied, so cookies stay first-party |
+| API      | Render web service from `api/Dockerfile`| Frankfurt region, health check `/health` |
+| Database | DynamoDB on-demand, `eu-central-1`      | the API creates the table and TTL on first start |
+| Payments | Stripe test mode                        | webhook endpoint `https://<api>/webhooks/stripe` |
+
+The API's AWS credentials belong to an IAM user limited to this one table and its index: [`infra/aws-iam-policy.json`](infra/aws-iam-policy.json).
+
+API environment in production: `COOKIE_SECRET`, `WEB_URL` (the Vercel URL, used for Stripe redirects and the `Secure` cookie flag), `DYNAMO_TABLE`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. `DYNAMO_ENDPOINT` is left unset, so the SDK talks to real DynamoDB.
+
+The same image runs on ECS Fargate behind an ALB with secrets from Secrets Manager and a task role instead of access keys.
 
 ## What I would do next
 

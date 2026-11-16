@@ -8,15 +8,15 @@ import { StripeGateway } from './stripe/gateway.js';
 
 const config = loadConfig();
 
-if (config.DYNAMO_ENDPOINT) {
-  // Local development: create the table automatically in DynamoDB Local.
-  const raw = new DynamoDBClient({
-    region: config.AWS_REGION,
-    endpoint: config.DYNAMO_ENDPOINT,
-    credentials: { accessKeyId: 'local', secretAccessKey: 'local' },
-  });
-  if (await ensureTable(raw, config.DYNAMO_TABLE)) console.log(`Created table "${config.DYNAMO_TABLE}"`);
-}
+// Create the table on first start: in DynamoDB Local for development, in AWS for a fresh deployment.
+// Safe to run on every start (it only describes the table when it already exists).
+const raw = new DynamoDBClient({
+  region: config.AWS_REGION,
+  ...(config.DYNAMO_ENDPOINT
+    ? { endpoint: config.DYNAMO_ENDPOINT, credentials: { accessKeyId: 'local', secretAccessKey: 'local' } }
+    : {}),
+});
+if (await ensureTable(raw, config.DYNAMO_TABLE)) console.log(`Created table "${config.DYNAMO_TABLE}"`);
 
 const repo = new DynamoRepo(
   createDocClient({ region: config.AWS_REGION, endpoint: config.DYNAMO_ENDPOINT }),

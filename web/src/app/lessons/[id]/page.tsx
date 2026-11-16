@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ERA_STYLE, Emblem } from '@/components/Emblem';
 import { ApiError, api, type Lesson, type LessonMeta, type Scene } from '@/lib/api';
 
@@ -15,7 +15,6 @@ export default function LessonPage() {
   const [step, setStep] = useState(0); // current scene; === scenes.length means the summary
   const [choices, setChoices] = useState<number[]>([]);
   const [next, setNext] = useState<LessonMeta | null>(null);
-  const top = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setStep(0);
@@ -42,7 +41,8 @@ export default function LessonPage() {
     setStep(nextStep);
     // Progress needs a session from the quiz; a guest playing a free story simply is not tracked.
     if (lesson && nextStep === lesson.scenes.length) api(`/lessons/${id}/complete`, { method: 'POST' }).catch(() => {});
-    top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Every new question starts from the top of the page, like a fresh page of the story.
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   if (state === 'loading') return <div className="mx-auto max-w-3xl px-5 py-24 text-dust">Turning the page…</div>;
@@ -74,7 +74,7 @@ export default function LessonPage() {
       </header>
 
       {/* Progress: one segment per decision */}
-      <div ref={top} className="sticky top-16 z-30 border-b hairline bg-night/80 backdrop-blur">
+      <div className="sticky top-16 z-30 border-b hairline bg-night/80 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center gap-4 px-5 py-3">
           <div className="flex flex-1 gap-1.5">
             {l.scenes.map((_, i) => (

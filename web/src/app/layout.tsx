@@ -33,9 +33,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main>{children}</main>
-        <footer className="mx-auto max-w-6xl px-5 py-12 text-xs text-dust/70">
-          Epoch is a portfolio demo. Payments run in Stripe test mode: use card 4242 4242 4242 4242.
-        </footer>
       </body>
     </html>
   );

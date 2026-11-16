@@ -1,6 +1,6 @@
 # Epoch
 
-Interactive history in five-minute decisions. A quiz funnel builds a personal path, a paywall sells a Stripe subscription, and webhooks turn payments into access.
+Interactive history in five-minute stories: 15 stories across 3 eras, each a chain of 2 to 3 decisions (6 free, 9 premium). A quiz funnel builds a personal path, a paywall sells a Stripe subscription, and webhooks turn payments into access.
 
 ![stack](https://img.shields.io/badge/Fastify-TypeScript-black) ![stack](https://img.shields.io/badge/DynamoDB-single--table-blue) ![stack](https://img.shields.io/badge/Stripe-subscriptions-635bff) ![stack](https://img.shields.io/badge/Next.js-App%20Router-black)
 
@@ -30,7 +30,7 @@ api/  Fastify + TypeScript
   src/repo/dynamo.ts       DynamoDB single-table implementation
   src/repo/memory.ts       in-memory implementation for unit tests
   src/domain/subscription  who gets access, plan ↔ price lookup keys
-  src/content/lessons.ts   lessons and decisions
+  src/content/lessons.ts   stories → scenes → decisions (one historical choice per scene)
 ```
 
 Routes depend on two interfaces, `Repo` and `BillingGateway`. That keeps the business logic testable without network calls, and switching the payment provider (for example to Solidgate) means writing one new gateway, not touching routes.
@@ -105,6 +105,7 @@ cd api && npm test
 
 - `webhook.test.ts`: activation, duplicate delivery, out-of-order events, grace period on `past_due`, payment failure, cancel at period end, unknown customers, release on failure.
 - `routes.test.ts`: the full flow through HTTP with **real Stripe signature verification**: quiz → session cookie → checkout → signed webhook → premium lesson unlocked; tampered cookies and forged signatures rejected.
+- `content.test.ts`: content invariants (five chapters per era, first two free, exactly one historical choice per scene).
 - `dynamo.test.ts`: the DynamoDB repository against a DynamoDB-compatible server (DynamoDB Local in CI, an in-process emulator otherwise): GSI lookup, conditional writes, idempotency, string sets.
 
 CI (GitHub Actions) runs typecheck, tests against DynamoDB Local, and builds both apps.

@@ -114,8 +114,10 @@ export function buildApp(deps: AppDeps) {
     const done = new Set(user?.completedLessons ?? []);
     return {
       eras: ERAS,
-      lessons: LESSONS.map(({ body: _b, decision: _d, ...meta }) => ({
+      // The list never carries story text: only metadata and how many decisions each story has.
+      lessons: LESSONS.map(({ scenes, ...meta }) => ({
         ...meta,
+        decisions: scenes.length,
         locked: !meta.free && !premium,
         completed: done.has(meta.id),
       })),
@@ -201,7 +203,7 @@ function buildPlan(era: keyof typeof ERAS, minutesPerDay: number) {
   return {
     era,
     eraTitle: ERAS[era].title,
-    lessons: lessons.map((l) => ({ id: l.id, title: l.title, year: l.year, free: l.free })),
+    lessons: lessons.map((l) => ({ id: l.id, title: l.title, year: l.year, free: l.free, decisions: l.scenes.length })),
     days: Math.max(1, Math.ceil(totalMinutes / minutesPerDay)),
   };
 }

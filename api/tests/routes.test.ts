@@ -40,6 +40,16 @@ describe('API', () => {
     expect(locked.json().error).toBe('premium_required');
   });
 
+  it('never sends story text in the lesson list', async () => {
+    const { app } = testApp();
+    const { lessons } = (await app.inject({ method: 'GET', url: '/lessons' })).json();
+    expect(lessons).toHaveLength(15);
+    for (const l of lessons) {
+      expect(l).not.toHaveProperty('scenes');
+      expect(l.decisions).toBeGreaterThanOrEqual(2);
+    }
+  });
+
   it('creates the Stripe customer once and returns a checkout URL', async () => {
     const { app, billing, repo } = testApp();
     const { cookie, userId } = await startFunnel(app);

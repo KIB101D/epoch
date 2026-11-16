@@ -74,7 +74,9 @@ cd api
 cp .env.example .env             # add your sk_test_ key
 npm install
 npm run stripe:setup             # creates the product and monthly/yearly prices (by lookup key)
-stripe listen --forward-to localhost:4000/webhooks/stripe   # copy the whsec_ into .env
+stripe listen \
+  --events checkout.session.completed,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,invoice.payment_failed \
+  --forward-to localhost:4000/webhooks/stripe   # copy the whsec_ into .env
 npm run dev                      # creates the table on first start
 
 # 3. Web (new terminal)

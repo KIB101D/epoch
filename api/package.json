@@ -1,0 +1,31 @@
+{
+  "name": "epoch-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:create": "tsx scripts/create-table.ts",
+    "stripe:setup": "tsx scripts/stripe-setup.ts",
+    "demo": "tsx scripts/demo.ts",
+    "demo:pay": "tsx scripts/demo-pay.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1169.0",
+    "@aws-sdk/lib-dynamodb": "^3.1169.0",
+    "@fastify/cookie": "^11.1.5",
+    "fastify": "^5.12.8",
+    "stripe": "^23.1.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "dynalite": "^4.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^5.1.0"
+  }
+}

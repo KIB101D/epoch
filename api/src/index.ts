@@ -40,4 +40,9 @@ const app: FastifyInstance = buildApp({
   logger: true,
 });
 
-await app.listen({ port: config.PORT, host: '0.0.0.0' });
+// Not awaited on purpose: on Vercel the runtime captures the server from listen() and never
+// fires the listening callback, so a top-level await here would block the module from loading.
+app.listen({ port: config.PORT, host: '0.0.0.0' }).catch((err) => {
+  app.log.error(err);
+  process.exit(1);
+});

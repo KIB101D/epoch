@@ -108,6 +108,58 @@ body::before {
   animation: draw 1.6s ease forwards;
 }
 
+/* Text that comes into focus, like a memory */
+@keyframes focus-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+.focus-in {
+  animation: focus-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* A wax-seal stamp for the verdict */
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.8) rotate(-12deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-6deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-6deg);
+  }
+}
+.stamp {
+  animation: stamp 0.55s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+/* Panels that unfold downwards (era chapters) */
+@keyframes unfold {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.unfold {
+  transform-origin: top;
+  animation: unfold 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -117,5 +169,8 @@ body::before {
   }
   .draw {
     stroke-dashoffset: 0;
+  }
+  .focus-in {
+    filter: none;
   }
 }

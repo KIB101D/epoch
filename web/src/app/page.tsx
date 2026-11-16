@@ -22,7 +22,7 @@ export default function Home() {
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-dust">
             Stand on the bank of the Rubicon with Caesar. Hide in Cleopatra&apos;s palace. Hold the heights at Austerlitz,
-            or don&apos;t. Five minutes a day, one decision at a time.
+            or don&apos;t. Five-minute stories, every one a chain of decisions.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <Link
@@ -38,9 +38,9 @@ export default function Home() {
           </div>
           <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t hairline pt-6">
             {[
-              ['3', 'eras'],
-              ['9', 'decisions'],
-              ['5 min', 'a day'],
+              ['15', 'stories'],
+              ['39', 'decisions'],
+              ['6', 'free stories'],
             ].map(([n, l]) => (
               <div key={l}>
                 <dt className="font-display text-3xl text-parchment">{n}</dt>
@@ -77,8 +77,8 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl gap-px px-5 py-8 sm:grid-cols-3 sm:py-12">
           {[
             ['01', 'Pick your era', 'A 30-second quiz builds a path around the period you care about.'],
-            ['02', 'Live the moment', 'Short scenes put you in the room where the decision was made.'],
-            ['03', 'Make the call', 'Choose, then see what your choice would cost and what really happened.'],
+            ['02', 'Live the moment', 'Each story is a few scenes that put you in the room where history was decided.'],
+            ['03', 'Make the calls', 'Choose, see what it would cost, learn what really happened, and get your verdict.'],
           ].map(([n, t, d]) => (
             <div key={n} className="p-6">
               <p className="font-display text-sm text-gold">{n}</p>

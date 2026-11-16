@@ -6,7 +6,7 @@ export interface PersonalPlan {
   era: Era;
   eraTitle: string;
   days: number;
-  lessons: { id: string; title: string; year: string; free: boolean }[];
+  lessons: { id: string; title: string; year: string; free: boolean; decisions: number }[];
 }
 
 export interface Me {
@@ -35,13 +35,26 @@ export interface LessonMeta {
   minutes: number;
   free: boolean;
   teaser: string;
+  /** Number of decisions (scenes) in the story. */
+  decisions: number;
   locked: boolean;
   completed: boolean;
 }
 
-export interface Lesson extends Omit<LessonMeta, 'locked' | 'completed'> {
-  body: string[];
-  decision: { prompt: string; options: { label: string; outcome: string; historical: boolean }[] };
+export interface DecisionOption {
+  label: string;
+  outcome: string;
+  historical: boolean;
+}
+
+export interface Scene {
+  moment: string;
+  text: string[];
+  decision: { prompt: string; options: DecisionOption[] };
+}
+
+export interface Lesson extends Omit<LessonMeta, 'locked' | 'completed' | 'decisions'> {
+  scenes: Scene[];
 }
 
 export interface Price {

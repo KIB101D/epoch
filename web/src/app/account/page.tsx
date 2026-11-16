@@ -79,7 +79,7 @@ export default function AccountPage() {
         </div>
         <div className="rounded-2xl border border-white/10 bg-night-2 p-6">
           <p className="text-xs uppercase tracking-[0.25em] text-dust">Progress</p>
-          <p className="mt-3 font-display text-3xl">{me.user.completedLessons.length} decisions</p>
+          <p className="mt-3 font-display text-3xl">{me.user.completedLessons.length} stories finished</p>
           {me.plan && <p className="mt-1 text-sm text-dust">Path: {me.plan.eraTitle}</p>}
           {me.user.email && <p className="mt-4 text-sm text-parchment/80">{me.user.email}</p>}
         </div>

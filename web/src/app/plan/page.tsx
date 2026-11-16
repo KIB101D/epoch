@@ -57,7 +57,7 @@ function PlanView() {
       <section className="rise">
         {canceled && (
           <p className="mb-6 rounded-xl border border-white/10 bg-night-2 px-4 py-3 text-sm text-dust">
-            No problem. Your plan is saved, and the first lesson is still free.
+            No problem. Your plan is saved, and the first two stories are still free.
           </p>
         )}
         <p className="text-xs uppercase tracking-[0.3em]" style={{ color: style.color }}>
@@ -67,7 +67,7 @@ function PlanView() {
           {plan.eraTitle}: <span className="italic text-dust">{style.tagline.toLowerCase()}</span>
         </h1>
         <p className="mt-4 text-dust">
-          {plan.lessons.length} decisions · {me.user.answers?.minutesPerDay} min a day · finish in about {plan.days} days
+          {plan.lessons.length} stories · {plan.lessons.reduce((n, l) => n + l.decisions, 0)} decisions · {me.user.answers?.minutesPerDay} min a day · about {plan.days} days
         </p>
 
         <ol className="relative mt-10 space-y-4 border-l pl-8" style={{ borderColor: `${style.color}55` }}>
@@ -81,7 +81,7 @@ function PlanView() {
               </span>
               <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-night-2 p-5">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-dust">Day {i + 1} · {l.year}</p>
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-dust">Chapter {i + 1} · {l.year} · {l.decisions} decisions</p>
                   <h3 className="mt-1 font-display text-xl">{l.title}</h3>
                 </div>
                 {l.free ? (
@@ -103,7 +103,7 @@ function PlanView() {
           {me.premium ? (
             <>
               <h2 className="font-display text-3xl">You are Premium</h2>
-              <p className="mt-2 text-dust">Every era and every decision is open.</p>
+              <p className="mt-2 text-dust">Every era, every chapter and every decision is open.</p>
               <Link href="/lessons" className="mt-6 block rounded-full bg-gold py-4 text-center font-semibold text-night">
                 Open the library
               </Link>
@@ -112,7 +112,7 @@ function PlanView() {
             <>
               <h2 className="font-display text-3xl">Unlock your full path</h2>
               <ul className="mt-4 space-y-2 text-sm text-parchment/90">
-                <li>✦ Your full {plan.eraTitle} path, plus every other era</li>
+                <li>✦ All 5 chapters of {plan.eraTitle}, plus every other era</li>
                 <li>✦ What really happened after every choice</li>
                 <li>✦ Progress saved across devices</li>
               </ul>
